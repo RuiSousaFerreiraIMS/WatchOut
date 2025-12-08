@@ -94,8 +94,11 @@ CREATE TABLE OrderItem (
 
     CONSTRAINT fk_orderitem_stockunit
         FOREIGN KEY (stock_unit_id) REFERENCES StockUnit(stock_unit_id)
-        ON UPDATE CASCADE ON DELETE SET NULL
+        ON UPDATE CASCADE ON DELETE SET NULL,
+
+    CONSTRAINT uq_orderitem_stockunit UNIQUE (stock_unit_id)
 );
+
 
 -- 8) Review
 CREATE TABLE Review (
