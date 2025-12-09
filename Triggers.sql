@@ -1,8 +1,8 @@
 USE watchout;
 
--- ========================================================
+-- =======================================================
 -- GROUP 1: AUTOMATION & WORKFLOW
--- ========================================================
+-- =======================================================
 
 -- Trigger 1: Auto-Update Stock Status
 -- Description: When an item is added to an order, we designed this trigger to 
