@@ -12,6 +12,7 @@ CREATE TABLE Customer (
     last_name       VARCHAR(50) NOT NULL,
     email           VARCHAR(120) UNIQUE NOT NULL,
     phone           VARCHAR(20),
+    loyalty_tier    ENUM('Standard', 'Gold', 'Platinum') DEFAULT 'Standard',
     created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -65,10 +66,6 @@ CREATE TABLE OrderHeader (
     employee_id     INT NULL,
     order_date      DATE NOT NULL,
 
-    -- NEW COLUMN: percentage discount, 0–100
-    discount_percent DECIMAL(5,2) NOT NULL DEFAULT 0.00
-        CHECK (discount_percent BETWEEN 0 AND 100),
-
     total_amount    DECIMAL(12,2),
 
     CONSTRAINT fk_orderheader_customer
@@ -90,6 +87,10 @@ CREATE TABLE OrderItem (
     quantity        INT NOT NULL CHECK (quantity > 0),
     unit_price      DECIMAL(10,2) NOT NULL,
 
+    -- NEW COLUMN: percentage discount, 0–100
+    discount_percent DECIMAL(5,2) NOT NULL DEFAULT 0.00
+        CHECK (discount_percent BETWEEN 0 AND 100),
+        
     CONSTRAINT fk_orderitem_order
         FOREIGN KEY (order_id) REFERENCES OrderHeader(order_id)
         ON UPDATE CASCADE ON DELETE CASCADE,

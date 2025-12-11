@@ -68,11 +68,10 @@ BEGIN
     END IF;
 END$$
 
--- Trigger 4: Automatic VIP Discounts
--- Description: We implemented a discount engine that intercepts the order process. 
--- Before an item is saved, we check the customer's tier. Gold members receive a 
--- 10% discount, and Platinum members receive 20%, applied instantly to the unit price.
+DELIMITER $$
+
 DROP TRIGGER IF EXISTS trg_apply_vip_discount $$
+
 CREATE TRIGGER trg_apply_vip_discount
 BEFORE INSERT ON OrderItem
 FOR EACH ROW
@@ -80,15 +79,27 @@ BEGIN
     DECLARE customer_tier ENUM('Standard', 'Gold', 'Platinum');
     DECLARE found_customer_id INT;
 
-    SELECT customer_id INTO found_customer_id FROM OrderHeader WHERE order_id = NEW.order_id;
-    SELECT loyalty_tier INTO customer_tier FROM Customer WHERE customer_id = found_customer_id;
+    -- 1. Get Customer ID
+    SELECT customer_id INTO found_customer_id 
+    FROM OrderHeader WHERE order_id = NEW.order_id;
 
+    -- 2. Get Tier
+    SELECT loyalty_tier INTO customer_tier 
+    FROM Customer WHERE customer_id = found_customer_id;
+
+    -- 3. Ensure discount_percent is not NULL (start at 0 if empty)
+    IF NEW.discount_percent IS NULL THEN
+        SET NEW.discount_percent = 0.00;
+    END IF;
+
+    -- 4. STACK the VIP Discount
     IF customer_tier = 'Gold' THEN
-        SET NEW.unit_price = NEW.unit_price * 0.90; 
+        SET NEW.discount_percent = NEW.discount_percent + 10.00; 
     ELSEIF customer_tier = 'Platinum' THEN
-        SET NEW.unit_price = NEW.unit_price * 0.80; 
+        SET NEW.discount_percent = NEW.discount_percent + 20.00; 
     END IF;
 END$$
+
 
 -- ========================================================
 -- GROUP 3: SECURITY & INTEGRITY

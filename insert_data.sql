@@ -333,23 +333,26 @@ INSERT INTO Review (customer_id, product_id, rating, review_text) VALUES
   
   
 -- Some orders with 5% discount
-UPDATE OrderHeader
+UPDATE OrderItem
 SET discount_percent = 5.00
 WHERE order_id IN (1, 10, 25);
 
 -- Some orders with 10% discount
-UPDATE OrderHeader
+UPDATE OrderItem
 SET discount_percent = 10.00
 WHERE order_id IN (2, 11);
 
 
 -- =========================
--- recompute totals just to be safe (now considering discount)
+-- RECOMPUTE TOTALS (With Item-Level Discounts)
+-- =========================
 UPDATE OrderHeader oh
 JOIN (
-  SELECT order_id, SUM(quantity * unit_price) AS total
+  SELECT 
+    order_id, 
+    -- Calculate discount for each item individually, then sum them up
+    SUM(quantity * unit_price * (1 - IFNULL(discount_percent, 0) / 100.0)) AS final_total
   FROM OrderItem
   GROUP BY order_id
 ) t ON oh.order_id = t.order_id
-SET oh.total_amount = t.total * (1 - oh.discount_percent / 100.0);
-
+SET oh.total_amount = t.final_total;
