@@ -104,6 +104,9 @@ CREATE TABLE OrderItem (
         ON UPDATE CASCADE ON DELETE SET NULL,
 
     CONSTRAINT uq_orderitem_stockunit UNIQUE (stock_unit_id)
+    -- Between StockUnit and OrderItem, Workbench shows a 1-N relationship because the tool only looks at the foreign key. 
+    -- However, in our code we also added a UNIQUE constraint on OrderItem.stock_unit_id, which in practice means that each physical unit in stock can be linked to at most one order item. 
+    -- So, from the business logic point of view, the relationship is 1:1 for sold watches.
 );
 
 
